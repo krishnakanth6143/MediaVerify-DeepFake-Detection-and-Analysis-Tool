@@ -62,4 +62,4 @@ class DeepFakeChatbot:
             }
 
 # Initialize chatbot with your OpenRouter API key
-chatbot = DeepFakeChatbot(api_key="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")
+chatbot = DeepFakeChatbot(api_key="your_api")
