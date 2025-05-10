@@ -23,7 +23,6 @@ ENV/
 .ipynb_checkpoints
 
 # Model checkpoints and large files
-*.pth
 *.h5
 *.pkl
 *.pt
@@ -51,3 +50,6 @@ static/explanation_*.png
 # System files
 .DS_Store
 Thumbs.db
+
+# Allow .pth files to be uploaded
+!*.pth
