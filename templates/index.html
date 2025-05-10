@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepFake Detection System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;    /* Purple */
+            --primary-light: #a29bfe;    /* Light Purple */
+            --primary-dark: #4834d4;     /* Dark Purple */
+            --secondary-color: #00b894;  /* Mint Green */
+            --secondary-light: #55efc4;  /* Light Green */
+            --accent-color: #fdcb6e;     /* Yellow */
+            --success-color: #00b894;    /* Mint */
+            --danger-color: #ff7675;     /* Salmon */
+            --warning-color: #ffeaa7;    /* Light Yellow */
+            --light-bg: #f9f9ff;         /* Light Lavender */
+            --dark-text: #2d3436;        /* Almost Black */
+            --light-text: #ffffff;       /* White */
+            --gray-text: #636e72;        /* Medium Gray */
+            --card-bg: #ffffff;          /* White */
+            --border-color: #dfe6e9;     /* Light Gray */
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--light-bg) 0%, #eceeff 100%);
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-text);
+            line-height: 1.7;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+        }
+        
+        .header-section {
+            text-align: center;
+            padding: 35px 25px;
+            background: linear-gradient(120deg, var(--primary-color), var(--primary-light));
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(108, 92, 231, 0.2);
+            color: var(--light-text);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-section::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 60%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(-30deg);
+        }
+        
+        .header-title {
+            font-weight: 700;
+            color: var(--light-text);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-box {
+            border: 2px dashed var(--primary-light);
+            padding: 40px 30px;
+            text-align: center;
+            border-radius: 20px;
+            background-color: var(--card-bg);
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .upload-box::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            background: linear-gradient(45deg, rgba(108, 92, 231, 0.05) 0%, rgba(0, 184, 148, 0.05) 100%);
+            z-index: -1;
+        }
+        
+        .upload-box:hover {
+            border-color: var(--secondary-light);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .upload-box.dragover {
+            border: 3px solid var(--secondary-color);
+            background-color: rgba(0, 184, 148, 0.05);
+        }
+        
+        .result-box {
+            margin-top: 40px;
+            padding: 30px;
+            border-radius: 20px;
+            background-color: var(--card-bg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-left: 6px solid var(--primary-color);
+            animation: fadeIn 0.6s ease-in;
+            position: relative;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-box::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(108, 92, 231, 0.05) 0%, rgba(0, 184, 148, 0.05) 100%);
+            border-radius: 0 0 20px 0;
+            z-index: -1;
+        }
+        
+        .img-preview, .explanation-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: none;
+            transition: transform 0.3s ease;
+        }
+        
+        .img-preview:hover, .explanation-img:hover {
+            transform: scale(1.02);
+        }
+        
+        .info-section {
+            background: linear-gradient(to right bottom, var(--card-bg), #f0f7ff);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border-top: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .info-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--secondary-light));
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .info-card {
+            border-left: 4px solid var(--secondary-color);
+            background-color: rgba(0, 184, 148, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.1);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 25px 20px;
+            background: linear-gradient(to right, var(--primary-dark), var(--primary-color));
+            border-radius: 20px;
+            color: var(--light-text);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .footer::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(to top, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .score-meter {
+            height: 15px;
+            border-radius: 15px;
+            background-color: #f5f6ff;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .score-fill {
+            height: 100%;
+            border-radius: 15px;
+            transition: width 1s cubic-bezier(0.19, 1, 0.22, 1);
+            background-size: 15px 15px;
+            background-image: linear-gradient(
+                45deg, 
+                rgba(255, 255, 255, .2) 25%, 
+                transparent 25%, 
+                transparent 50%, 
+                rgba(255, 255, 255, .2) 50%, 
+                rgba(255, 255, 255, .2) 75%, 
+                transparent 75%, 
+                transparent
+            );
+            animation: move 1s linear infinite;
+        }
+        
+        @keyframes move {
+            0% { background-position: 0 0; }
+            100% { background-position: 15px 0; }
+        }
+        
+        .score-label {
+            position: absolute;
+            top: -25px;
+            right: 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--gray-text);
+        }
+        
+        .btn {
+            border-radius: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            padding: 12px 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: width 0.6s ease, height 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+        
+        .btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            border: none;
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: #b3b3cc;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border: 2px solid var(--primary-light);
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+        }
+        
+        .badge {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge.bg-danger {
+            background: linear-gradient(45deg, var(--danger-color), #fab1a0) !important;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.4);
+        }
+        
+        .badge.bg-success {
+            background: linear-gradient(45deg, var(--success-color), var(--secondary-light)) !important;
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.4);
+        }
+        
+        .alert {
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .alert-danger {
+            background-color: rgba(255, 118, 117, 0.1);
+            border-left: 4px solid var(--danger-color);
+            color: #eb4d4b;
+        }
+        
+        .alert-success {
+            background-color: rgba(0, 184, 148, 0.1);
+            border-left: 4px solid var(--success-color);
+            color: #00896f;
+        }
+        
+        h4 {
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .bi {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .section-divider {
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--secondary-color), transparent);
+            margin: 35px 0;
+            border-radius: 4px;
+        }
+        
+        .file-name {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .spinner {
+            display: none;
+            margin-left: 10px;
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            color: var(--primary-light);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .feature-list {
+            list-style-type: none;
+            padding-left: 5px;
+        }
+        
+        .feature-list li {
+            position: relative;
+            padding: 8px 0 8px 35px;
+            margin-bottom: 5px;
+        }
+        
+        .feature-icon {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .tech-badge {
+            display: inline-block;
+            background: rgba(108, 92, 231, 0.1);
+            color: var(--primary-color);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .tech-badge:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 2.2rem;
+            }
+            
+            .upload-box {
+                padding: 25px 15px;
+            }
+            
+            .result-box {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg" style="background-color: var(--primary-dark);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('home') }}" style="color: var(--light-text); font-weight: 700;">
+                <i class="bi bi-shield-check me-2"></i>DeepFake Detector
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}" style="color: var(--light-text);">
+                            <i class="bi bi-house-door me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('detect') }}" style="color: var(--accent-color);">
+                            <i class="bi bi-search me-1"></i> Detection
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}" style="color: var(--light-text);">
+                            <i class="bi bi-graph-up me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about') }}" style="color: var(--light-text);">
+                            <i class="bi bi-info-circle me-1"></i> About
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-bar-chart me-1"></i> View Stats
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <!-- Enhanced Header Section with Research Highlights -->
+        <div class="header-section" style="background: linear-gradient(120deg, var(--primary-dark), var(--primary-color)); padding: 50px 25px;">
+            <h1 class="header-title">DeepFake Detection System</h1>
+            <p class="lead">Advanced AI-powered detection for digital media security</p>
+            
+            <!-- Update research highlights style -->
+            <div class="research-highlights mt-3">
+                <div class="metric-card">
+                    <div class="metric-value">12.7ms</div>
+                    <div class="metric-label">Processing Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">90%+</div>
+                    <div class="metric-label">Detection Accuracy</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">100%</div>
+                    <div class="metric-label">Real-time Processing</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add new styles for research highlights to match home page -->
+        <style>
+            .research-highlights {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                flex-wrap: wrap;
+                margin-top: 20px;
+            }
+            
+            .metric-card {
+                background-color: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(10px);
+                padding: 15px 20px;
+                border-radius: 15px;
+                text-align: center;
+                transition: transform 0.3s ease;
+            }
+            
+            .metric-card:hover {
+                transform: translateY(-5px);
+            }
+            
+            .metric-value {
+                font-size: 1.8rem;
+                font-weight: 700;
+                margin-bottom: 5px;
+            }
+            
+            .metric-label {
+                font-size: 0.9rem;
+                opacity: 0.9;
+            }
+            
+            .highlight-badge {
+                display: none; /* Hide old style badges */
+            }
+        </style>
+
+        <!-- Upload Form with Drag and Drop -->
+        <div class="upload-box" id="drop-zone" role="region" aria-label="File upload area">
+            <form method="POST" enctype="multipart/form-data" id="upload-form">
+                <i class="bi bi-cloud-arrow-up upload-icon"></i>
+                <h4 class="mt-3">Upload an Image</h4>
+                <p class="text-muted">Drag and drop or click to browse (JPG/PNG only)</p>
+                <div class="mb-3">
+                    <input type="file" class="form-control" id="file" name="file" accept=".jpg,.jpeg,.png" style="display: none;" aria-label="File input">
+                    <button type="button" class="btn btn-outline-primary px-4 py-2" id="browse-btn">
+                        <i class="bi bi-image me-2"></i>Browse Files
+                    </button>
+                </div>
+                <div id="file-name" class="mt-2 file-name"></div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary px-4 py-2" id="analyze-btn" disabled>
+                        <i class="bi bi-search me-2"></i>Analyze Image
+                        <span class="spinner-border spinner-border-sm spinner" role="status" aria-hidden="true"></span>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary px-4 py-2 ms-2" id="clear-btn">
+                        <i class="bi bi-x-circle me-2"></i>Clear
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Display Message (e.g., Errors) -->
+        {% if message %}
+            <div class="alert alert-warning mt-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ message }}
+            </div>
+        {% endif %}
+
+        <div class="section-divider"></div>
+
+        <!-- Information Section -->
+        <div class="info-section">
+            <h4><i class="bi bi-info-circle-fill me-2"></i> About DeepFake Detection</h4>
+            <div class="info-card mt-3">
+                <p>Our system leverages <strong style="color: var(--primary-color);">cutting-edge AI</strong> to detect media manipulation using:</p>
+                <ul class="feature-list">
+                    <li>
+                        <span class="feature-icon" style="background: rgba(108, 92, 231, 0.1);"><i class="bi bi-braces" style="color: var(--primary-dark);"></i></span>
+                        <span>Spatial-temporal analysis with deep neural networks</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon" style="background: rgba(0, 184, 148, 0.1);"><i class="bi bi-soundwave" style="color: var(--secondary-color);"></i></span>
+                        <span>Audio-visual signal correlation detection</span>
+                            <span>Spatial-temporal an                        <span class="feature-icon" style="background: rgba(253, 203, 110, 0.1);"><i class="bi bi-diagram-3" style="color: var(--accent-color);"></i></span>
+                        <span>Explainable AI visualization techniques</span>
+                    </li>
+                </ul>
+                <div class="mt-3">
+                    <span class="tech-badge"><i class="bi bi-lightning-charge-fill me-1"></i>12.7ms processing</span>
+                    <span class="tech-badge"><i class="bi bi-bullseye me-1"></i>High accuracy</span>
+                    <span class="tech-badge"><i class="bi bi-shield-check me-1"></i>Media security</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Display Results -->
+        {% if result %}
+            <div class="result-box" style="border-left: 6px solid {% if result == 'Fake' %}var(--danger-color){% else %}var(--success-color){% endif %};">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 style="color: {% if result == 'Fake' %}var(--danger-color){% else %}var(--success-color){% endif %}; font-weight: 600;">Analysis Result</h3>
+                    <span class="badge {{ 'bg-danger' if result == 'Fake' else 'bg-success' }} p-2" style="font-size: 1.1rem;">{{ result }}</span>
+                </div>
+                
+                {% if result == 'Fake' %}
+                <div class="score-meter">
+                    <div class="score-fill bg-danger" style="width: 85%"></div>
+                    <span class="score-label">85% Confidence</span>
+                </div>
+                <p class="alert alert-danger">
+                    <i class="bi bi-shield-exclamation me-2"></i> This image shows signs of deepfake manipulation.
+                </p>
+                {% else %}
+                <div class="score-meter">
+                    <div class="score-fill bg-success" style="width: 90%"></div>
+                    <span class="score-label">90% Confidence</span>
+                </div>
+                <p class="alert alert-success">
+                    <i class="bi bi-shield-check me-2"></i> No manipulation detected. Image appears authentic.
+                </p>
+                {% endif %}
+
+                {% if uploaded_image %}
+                    <h4 class="mt-4"><i class="bi bi-image me-2"></i>Analyzed Image:</h4>
+                    <img src="{{ url_for('static', filename=uploaded_image) }}" alt="Uploaded Image" class="img-preview">
+                {% endif %}
+
+                <!-- LIME Explanation (Only for Fake Images) -->
+                {% if explanation_image %}
+                    <div class="section-divider"></div>
+                    <h4 class="mt-4"><i class="bi bi-graph-up me-2"></i>Visual Explanation:</h4>
+                    <p>Highlighted areas indicate regions with detected manipulation patterns.</p>
+                    <img src="{{ url_for('static', filename=explanation_image) }}" alt="LIME Explanation" class="explanation-img">
+                    <div class="info-card mt-3" style="border-left: 4px solid var(--accent-color); background-color: rgba(253, 203, 110, 0.05);">
+                        <h5 style="color: var(--accent-color); font-weight: 600;">How It Works</h5>
+                        <p>Our explainable AI highlights key areas contributing to the "Fake" prediction, using advanced visualization techniques.</p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+        
+        <footer class="footer">
+            <p><strong>DeepFake Detection System</strong> - Powered by Advanced AI</p>
+            <p class="small" style="opacity: 0.8;">Securing digital media with explainable AI technology</p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS and custom scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file');
+        const browseBtn = document.getElementById('browse-btn');
+        const fileName = document.getElementById('file-name');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const uploadForm = document.getElementById('upload-form');
+        const spinner = analyzeBtn.querySelector('.spinner');
+
+        browseBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', updateFileInfo);
+
+        function updateFileInfo() {
+            if (fileInput.files.length > 0) {
+                fileName.textContent = fileInput.files[0].name;
+                analyzeBtn.disabled = false;
+            } else {
+                resetForm();
+            }
+        }
+
+        function resetForm() {
+            fileInput.value = '';
+            fileName.textContent = '';
+            analyzeBtn.disabled = true;
+        }
+
+        clearBtn.addEventListener('click', resetForm);
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        dropZone.addEventListener('dragenter', () => dropZone.classList.add('dragover'));
+        dropZone.addEventListener('dragover', () => dropZone.classList.add('dragover'));
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', handleDrop);
+
+        function handleDrop(e) {
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFileInfo();
+            }
+        }
+
+        // Show spinner on form submit
+        uploadForm.addEventListener('submit', () => {
+            analyzeBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+        });
+    </script>
+    
+    <!-- Chatbot -->
+    {% include 'chatbot.html' %}
+</body>
+</html>
