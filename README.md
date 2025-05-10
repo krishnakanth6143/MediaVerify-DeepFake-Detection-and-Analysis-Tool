@@ -1,4 +1,4 @@
-# DeepFake Detector: Preserving Digital Media Integrity
+# MediaVerify: DeepFake Detection and Analysis Tool
 
 A web-based system that helps users identify and analyze manipulated media using advanced AI technology.
 
