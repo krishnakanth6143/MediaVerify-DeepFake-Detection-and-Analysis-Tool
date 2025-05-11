@@ -6,13 +6,27 @@ A web-based system that helps users identify and analyze manipulated media using
 
 The DeepFake Detection System addresses the growing challenge of manipulated media content. As deepfake technology becomes more sophisticated, this tool provides reliable detection methods to preserve trust in digital content, allowing users to distinguish between authentic and synthetic media.
 
+![image](https://github.com/user-attachments/assets/aa096c49-70f7-4493-9d48-d5a2e4c2f5d8)
+
+
 ## Features
 
 - **Real-time Detection**: Process images in just 12.7ms on average
+![image](https://github.com/user-attachments/assets/6b1be6e1-bf84-4676-961c-04f65654a974)
+
 - **High Accuracy**: Over 90% accuracy across multiple datasets
+![image](https://github.com/user-attachments/assets/8636799c-e832-4198-92e7-d6344a77002a)
+
 - **Explainable AI**: LIME visualization to explain detection decisions
+![image](https://github.com/user-attachments/assets/b1c66e5f-0151-4c6f-a8ed-f41f147eb9cc)
+
 - **User Dashboard**: Track detection statistics and historical analysis
+![image](https://github.com/user-attachments/assets/4a687462-9443-4bb2-b403-41dc5c155d34)
+
 - **AI Chatbot Assistant**: Get information about deepfakes and how they work
+
+![image](https://github.com/user-attachments/assets/522f4cc5-f249-42ff-9866-a36dbd4ea6e0)
+
 
 ## Technology Stack
 
